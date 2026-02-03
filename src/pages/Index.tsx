@@ -59,7 +59,7 @@ const Index = () => {
 
     hideTimeoutRef.current = window.setTimeout(() => {
       setCatFullyVisible(false);
-    }, 10000);
+    }, 5000);
   };
 
   useEffect(() => {
@@ -117,7 +117,45 @@ const Index = () => {
         <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        
+        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(16, 185, 129, 0.1)" strokeWidth="1"/>
+            </pattern>
+            <linearGradient id="gridGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style={{ stopColor: 'rgba(16, 185, 129, 0)', stopOpacity: 0 }} />
+              <stop offset="50%" style={{ stopColor: 'rgba(16, 185, 129, 0.2)', stopOpacity: 1 }} />
+              <stop offset="100%" style={{ stopColor: 'rgba(16, 185, 129, 0)', stopOpacity: 0 }} />
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+          <rect width="100%" height="100%" fill="url(#gridGradient)" className="animate-pulse" style={{ animationDuration: '4s' }} />
+        </svg>
+
+        <div className="absolute inset-0">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-emerald-500 rounded-full"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animation: `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 2}s`,
+                opacity: 0
+              }}
+            />
+          ))}
+        </div>
       </div>
+
+      <style>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0; transform: scale(0); }
+          50% { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
 
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
