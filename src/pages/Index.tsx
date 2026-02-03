@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,25 +6,79 @@ import Icon from '@/components/ui/icon';
 
 const catPhrases = [
   "Мяу! Скидки тут! 🐱",
-  "BexumVPN лучший! 💎",
+  "NoCap лучший! 💎",
   "Смотри кино без лагов! 🍿",
   "Анонимность — это мяуто! 🔒",
-  "Я одобряю этот VPN! ✨"
+  "Я одобряю этот VPN! ✨",
+  "Быстрее света! ⚡",
+  "Твоя приватность защищена! 🛡️"
 ];
 
 const Index = () => {
   const [catPhrase, setCatPhrase] = useState(catPhrases[0]);
   const [showPhrase, setShowPhrase] = useState(false);
+  const [catVisible, setCatVisible] = useState(false);
+  const [catFullyVisible, setCatFullyVisible] = useState(false);
+  const hideTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const phraseInterval = setInterval(() => {
-      setShowPhrase(true);
+    const timer = setTimeout(() => {
+      setCatVisible(true);
+      setCatFullyVisible(true);
       setCatPhrase(catPhrases[Math.floor(Math.random() * catPhrases.length)]);
+      setShowPhrase(true);
       
-      setTimeout(() => setShowPhrase(false), 4000);
-    }, 8000);
+      setTimeout(() => {
+        setShowPhrase(false);
+        setTimeout(() => {
+          setCatFullyVisible(false);
+        }, 2000);
+      }, 3000);
+    }, 1000);
 
-    return () => clearInterval(phraseInterval);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleCatClick = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+
+    if (!catFullyVisible) {
+      setCatFullyVisible(true);
+      setTimeout(() => {
+        setCatPhrase(catPhrases[Math.floor(Math.random() * catPhrases.length)]);
+        setShowPhrase(true);
+        setTimeout(() => setShowPhrase(false), 3000);
+      }, 500);
+    } else {
+      setCatPhrase(catPhrases[Math.floor(Math.random() * catPhrases.length)]);
+      setShowPhrase(true);
+      setTimeout(() => setShowPhrase(false), 3000);
+    }
+
+    hideTimeoutRef.current = window.setTimeout(() => {
+      setCatFullyVisible(false);
+    }, 10000);
+  };
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.animate-scroll-fade').forEach((el) => {
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   const pricingPlans = [
@@ -58,11 +112,17 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-teal-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
       <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="text-2xl font-bold">
-            Bexum<span className="gradient-text">VPN</span>
+            No<span className="gradient-text">Cap</span>
           </div>
           <Button variant="outline" className="gradient-bg border-0 text-white hover:opacity-90">
             <Icon name="Send" size={16} className="mr-2" />
@@ -71,9 +131,7 @@ const Index = () => {
         </div>
       </header>
 
-      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_50%)]" />
-        
+      <section className="pt-32 pb-20 px-4 relative">
         <div className="container mx-auto text-center relative z-10 animate-fade-in">
           <Badge className="mb-6 gradient-bg border-0 text-white px-4 py-2">
             <Icon name="Sparkles" size={14} className="mr-2" />
@@ -82,7 +140,7 @@ const Index = () => {
           
           <h1 className="text-5xl md:text-7xl font-black mb-6">
             Интернет без границ<br />
-            <span className="gradient-text">с BexumVPN</span>
+            <span className="gradient-text">с NoCap</span>
           </h1>
           
           <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto">
@@ -100,15 +158,20 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="fixed bottom-8 right-8 z-50 animate-float">
+        <div 
+          className={`fixed bottom-0 right-8 z-50 cursor-pointer transition-transform duration-700 ease-out ${
+            catVisible ? (catFullyVisible ? 'translate-y-0' : 'translate-y-24') : 'translate-y-full'
+          }`}
+          onClick={handleCatClick}
+        >
           <div className="relative">
             <img 
               src="https://cdn.poehali.dev/projects/47dc99d3-64c6-4831-85fa-a16b9944f3e2/files/f73c55aa-9bad-4150-88bd-2a77793b9366.jpg"
               alt="Cat mascot"
-              className="w-32 h-32 rounded-full object-cover border-4 border-primary shadow-2xl shadow-primary/50"
+              className="w-32 h-32 rounded-full object-cover shadow-2xl shadow-emerald-500/50 hover:shadow-emerald-500/70 transition-shadow"
             />
             {showPhrase && (
-              <div className="absolute -top-16 -left-20 bg-white text-slate-900 px-4 py-2 rounded-2xl shadow-lg animate-fade-in whitespace-nowrap">
+              <div className="absolute -top-16 -left-20 bg-white text-slate-900 px-4 py-2 rounded-2xl shadow-lg animate-fade-in whitespace-nowrap font-medium">
                 {catPhrase}
                 <div className="absolute bottom-0 right-8 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-white" />
               </div>
@@ -117,7 +180,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="pricing" className="py-20 px-4 bg-slate-950/50">
+      <section id="pricing" className="py-20 px-4 bg-slate-950/50 animate-scroll-fade">
         <div className="container mx-auto">
           <h2 className="text-5xl font-black text-center mb-4">Тарифные планы</h2>
           <p className="text-slate-400 text-center mb-12">Выберите подходящий для вас период</p>
@@ -128,7 +191,7 @@ const Index = () => {
                 key={idx}
                 className={`relative p-6 transition-all duration-300 hover:scale-105 ${
                   plan.highlight 
-                    ? 'bg-gradient-to-br from-primary/20 to-secondary/20 border-primary' 
+                    ? 'bg-gradient-to-br from-emerald-500/20 to-green-500/20 border-primary' 
                     : 'bg-card border-slate-800'
                 }`}
               >
@@ -171,9 +234,9 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="features" className="py-20 px-4">
+      <section id="features" className="py-20 px-4 animate-scroll-fade">
         <div className="container mx-auto">
-          <h2 className="text-5xl font-black text-center mb-4">Почему BexumVPN?</h2>
+          <h2 className="text-5xl font-black text-center mb-4">Почему NoCap?</h2>
           <p className="text-slate-400 text-center mb-12">Технологии, которые работают на вас</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -182,7 +245,7 @@ const Index = () => {
                 key={idx}
                 className="p-6 bg-card border-slate-800 hover:border-primary transition-all duration-300 hover:scale-105"
               >
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center mb-4">
                   <Icon name={feature.icon as any} size={24} className="text-primary" />
                 </div>
                 <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
@@ -193,7 +256,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="locations" className="py-20 px-4 bg-slate-950/50">
+      <section id="locations" className="py-20 px-4 bg-slate-950/50 animate-scroll-fade">
         <div className="container mx-auto text-center">
           <h2 className="text-5xl font-black mb-12">Доступные локации</h2>
           
@@ -219,9 +282,9 @@ const Index = () => {
         </div>
       </section>
 
-      <footer className="py-12 px-4 border-t border-slate-800">
+      <footer className="py-12 px-4 border-t border-slate-800 animate-scroll-fade">
         <div className="container mx-auto text-center">
-          <p className="text-slate-500 mb-4">© 2026 BexumVPN. All rights reserved.</p>
+          <p className="text-slate-500 mb-4">© 2026 NoCap. All rights reserved.</p>
           <div className="flex justify-center gap-6">
             <a href="#" className="text-slate-400 hover:text-primary transition-colors">
               Политика конфиденциальности
